@@ -28,7 +28,8 @@ public:
   size_t highestCount() const
   {
     // m_NextIndex is the number of files ever created (dense, monotonic), which
-    // is the true count even though m_Files may be over-sized by chunk growth in createFile.
+    // is the true count even though m_Files may be over-sized by chunk growth in
+    // createFile.
     return m_NextIndex;
   }
 

@@ -337,15 +337,15 @@ private:
   // as long as the source path and modification time are unchanged.
   struct CachedESPData
   {
-    FILETIME time = {};
-    bool parseFailed = false;
-    bool isMaster = false;
-    bool isLight = false;
-    bool isMedium = false;
-    bool isBlueprint = false;
-    bool isDummy = false;
+    FILETIME time        = {};
+    bool parseFailed     = false;
+    bool isMaster        = false;
+    bool isLight         = false;
+    bool isMedium        = false;
+    bool isBlueprint     = false;
+    bool isDummy         = false;
     uint16_t formVersion = 0;
-    float headerVersion = 0.0f;
+    float headerVersion  = 0.0f;
     std::string author;
     std::string description;
     std::set<std::string> masters;

@@ -2135,9 +2135,9 @@ QModelIndex PluginList::parent(const QModelIndex&) const
   return QModelIndex();
 }
 
-const PluginList::CachedESPData&
-PluginList::cachedESPData(const QString& fullPath, FILETIME fileTime,
-                          bool mediumSupported)
+const PluginList::CachedESPData& PluginList::cachedESPData(const QString& fullPath,
+                                                           FILETIME fileTime,
+                                                           bool mediumSupported)
 {
   auto it = m_ESPParseCache.find(fullPath);
   if (it != m_ESPParseCache.end() &&
@@ -2162,7 +2162,8 @@ PluginList::cachedESPData(const QString& fullPath, FILETIME fileTime,
     data.description   = file.description();
     data.masters       = file.masters();
   } catch (const std::exception& e) {
-    // flag the failure so the ESPInfo constructor zeroes the derived fields and do NOT cache it
+    // flag the failure so the ESPInfo constructor zeroes the derived fields and do NOT
+    // cache it
     log::error("failed to parse plugin file {}: {}", fullPath, e.what());
     static const CachedESPData failed = [] {
       CachedESPData d;

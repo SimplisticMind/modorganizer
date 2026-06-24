@@ -151,14 +151,16 @@ bool FileEntry::removeOrigin(OriginID origin)
 
 void FileEntry::sortOrigins()
 {
-  // No per-entry lock here, you MUST have exclusive lock on originsSortReadLock (see FileRegister::sortOrigins)
+  // No per-entry lock here, you MUST have exclusive lock on originsSortReadLock (see
+  // FileRegister::sortOrigins)
 
   // No alternatives, nothing to sort. Let's not do useless work.
   if (m_Alternatives.empty()) {
     return;
   }
 
-  // m_Archive is reassigned from the sorted result below, so it can be moved in rather than copied
+  // m_Archive is reassigned from the sorted result below, so it can be moved in rather
+  // than copied
   m_Alternatives.push_back({m_Origin, std::move(m_Archive)});
 
   std::sort(m_Alternatives.begin(), m_Alternatives.end(), [&](auto&& LHS, auto&& RHS) {

@@ -257,8 +257,9 @@ void DirectoryEntry::propagateOrigin(int origin)
   {
     std::scoped_lock lock(m_OriginsMutex);
     if (!m_Origins.insert(origin).second) {
-      // The origin was already recorded here. By construction, an origin is only ever added to a directory
-      // together with all of its ancestors, so every ancestor already has it too - there is nothing left to propagate.
+      // The origin was already recorded here. By construction, an origin is only ever
+      // added to a directory together with all of its ancestors, so every ancestor
+      // already has it too - there is nothing left to propagate.
       return;
     }
   }

@@ -30,7 +30,7 @@ FileEntryPtr FileRegister::createFile(std::wstring name, DirectoryEntry* parent,
                                       DirectoryStats& stats)
 {
   const auto index = generateIndex();
-  auto p = boost::make_shared<FileEntry>(index, std::move(name), parent);
+  auto p           = boost::make_shared<FileEntry>(index, std::move(name), parent);
 
   // Fast path: if the slot already exists, assign it under a SHARED lock. This
   // is safe because the container only ever grows (so the slot stays valid), the

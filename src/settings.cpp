@@ -2239,8 +2239,9 @@ bool InterfaceSettings::collapsibleSeparatorsIcons(int column) const
 {
   auto it = m_CollapsibleSeparatorsIcons.find(column);
   if (it == m_CollapsibleSeparatorsIcons.end()) {
-    const bool v = get<bool>(m_Settings, "Settings",
-                             QString("collapsible_separators_icons_%1").arg(column), true);
+    const bool v =
+        get<bool>(m_Settings, "Settings",
+                  QString("collapsible_separators_icons_%1").arg(column), true);
     it = m_CollapsibleSeparatorsIcons.emplace(column, v).first;
   }
   return it->second;

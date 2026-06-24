@@ -1607,12 +1607,11 @@ std::set<QString> OrganizerCore::activeArchives()
 
   // plugins present in the virtual data directory, keyed by their base name so we
   // can match archives like "MyMod - Textures.bsa" to the plugin "MyMod.esp"
-  const QStringList plugins =
-      findFiles("", [](const QString& fileName) -> bool {
-        return fileName.endsWith(".esp", Qt::CaseInsensitive) ||
-               fileName.endsWith(".esm", Qt::CaseInsensitive) ||
-               fileName.endsWith(".esl", Qt::CaseInsensitive);
-      });
+  const QStringList plugins = findFiles("", [](const QString& fileName) -> bool {
+    return fileName.endsWith(".esp", Qt::CaseInsensitive) ||
+           fileName.endsWith(".esm", Qt::CaseInsensitive) ||
+           fileName.endsWith(".esl", Qt::CaseInsensitive);
+  });
 
   QList<std::pair<QString, QString>> pluginNamePairs;
   pluginNamePairs.reserve(plugins.size());
