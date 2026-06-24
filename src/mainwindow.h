@@ -231,7 +231,11 @@ private:
                        std::string fileName);
 
   // Performs checks, sets the m_NumberOfProblems and signals checkForProblemsDone().
-  void checkForProblemsImpl();
+  //
+  // Must run on the GUI thread: the diagnose plugins read live model state
+  // (plugin list, mod list, ...) which is mutated on the GUI thread. Running
+  // this on a worker thread races those containers and corrupts the heap.
+  void checkForProblems();
 
   void setCategoryListVisible(bool visible);
 
@@ -322,9 +326,7 @@ private:
   // when painting the count
   QIcon m_originalNotificationIcon;
 
-  std::atomic<std::size_t> m_NumberOfProblems;
-  std::atomic<bool> m_ProblemsCheckRequired;
-  std::mutex m_CheckForProblemsMutex;
+  std::size_t m_NumberOfProblems;
 
   QVersionNumber m_LastVersion;
 
@@ -418,9 +420,6 @@ private slots:
   // Queue a problem check to allow collapsing of multiple requests in short amount of
   // time.
   void scheduleCheckForProblems();
-
-  // Perform the actual problem check in another thread.
-  QFuture<void> checkForProblemsAsync();
 
   void saveModMetas();
 

@@ -243,8 +243,7 @@ MainWindow::MainWindow(Settings& settings, OrganizerCore& organizerCore,
       m_PluginContainer(pluginContainer),
       m_ArchiveListWriter(std::bind(&MainWindow::saveArchiveList, this)),
       m_LinkToolbar(nullptr), m_LinkDesktop(nullptr), m_LinkStartMenu(nullptr),
-      m_SystemTrayManager(nullptr), m_NumberOfProblems(0),
-      m_ProblemsCheckRequired(false)
+      m_SystemTrayManager(nullptr), m_NumberOfProblems(0)
 {
   // disables incredibly slow menu fade in effect that looks and feels like crap.
   // this was only happening to users with the windows
@@ -467,7 +466,7 @@ MainWindow::MainWindow(Settings& settings, OrganizerCore& organizerCore,
 
   m_UpdateProblemsTimer.setSingleShot(true);
   connect(&m_UpdateProblemsTimer, &QTimer::timeout, this,
-          &MainWindow::checkForProblemsAsync);
+          &MainWindow::checkForProblems);
   connect(this, &MainWindow::checkForProblemsDone, this,
           &MainWindow::updateProblemsButton, Qt::ConnectionType::QueuedConnection);
 
@@ -1021,35 +1020,24 @@ bool MainWindow::errorReported(QString& logFile)
   return false;
 }
 
-QFuture<void> MainWindow::checkForProblemsAsync()
+void MainWindow::checkForProblems()
 {
-  return QtConcurrent::run([this]() {
-    checkForProblemsImpl();
-  });
-}
-
-void MainWindow::checkForProblemsImpl()
-{
-  m_ProblemsCheckRequired = true;
-
-  std::scoped_lock lk(m_CheckForProblemsMutex);
-
-  // another thread might already have checked while this one was waiting on the lock
-  if (m_ProblemsCheckRequired) {
-    m_ProblemsCheckRequired = false;
-    TimeThis tt("MainWindow::checkForProblemsImpl()");
-    size_t numProblems = 0;
-    for (QObject* pluginObj : m_PluginContainer.plugins<QObject>()) {
-      IPlugin* plugin = qobject_cast<IPlugin*>(pluginObj);
-      if (plugin == nullptr || m_PluginContainer.isEnabled(plugin)) {
-        IPluginDiagnose* diagnose = qobject_cast<IPluginDiagnose*>(pluginObj);
-        if (diagnose != nullptr)
-          numProblems += diagnose->activeProblems().size();
-      }
+  // This must run on the GUI thread. The diagnose plugins query live model
+  // state (plugin list masters/states, mod list, ...) which is mutated on the
+  // GUI thread; running this concurrently races those containers and corrupts
+  // the heap (e.g. while rapidly toggling a mod on and off).
+  TimeThis tt("MainWindow::checkForProblems()");
+  size_t numProblems = 0;
+  for (QObject* pluginObj : m_PluginContainer.plugins<QObject>()) {
+    IPlugin* plugin = qobject_cast<IPlugin*>(pluginObj);
+    if (plugin == nullptr || m_PluginContainer.isEnabled(plugin)) {
+      IPluginDiagnose* diagnose = qobject_cast<IPluginDiagnose*>(pluginObj);
+      if (diagnose != nullptr)
+        numProblems += diagnose->activeProblems().size();
     }
-    m_NumberOfProblems = numProblems;
-    emit checkForProblemsDone();
   }
+  m_NumberOfProblems = numProblems;
+  emit checkForProblemsDone();
 }
 
 void MainWindow::about()
@@ -3735,9 +3723,7 @@ void MainWindow::on_bsaList_itemChanged(QTreeWidgetItem*, int)
 
 void MainWindow::on_actionNotifications_triggered()
 {
-  auto future = checkForProblemsAsync();
-
-  future.waitForFinished();
+  checkForProblems();
 
   ProblemsDialog problems(m_PluginContainer, this);
   problems.exec();
